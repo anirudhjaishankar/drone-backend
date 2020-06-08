@@ -15,7 +15,7 @@ export interface IDrone {
     status: DroneStatus,
     currentLocation: GeoPoint,
     currentRouteAssigned: DroneRoute | undefined,
-    LastRouteAssigned: DroneRoute | undefined,
+    lastRouteAssigned: DroneRoute | undefined,
 }
 
 export class Drone implements IDrone {
@@ -25,7 +25,7 @@ export class Drone implements IDrone {
     status: DroneStatus;
     currentLocation: GeoPoint;
     currentRouteAssigned: DroneRoute | undefined;
-    LastRouteAssigned: DroneRoute | undefined;
+    lastRouteAssigned: DroneRoute | undefined;
 
 
     constructor(
@@ -34,14 +34,14 @@ export class Drone implements IDrone {
         currentLocation: GeoPoint,
         status?: DroneStatus,
         currentRouteAssigned?: DroneRoute,
-        LastRouteAssigned?: DroneRoute
+        lastRouteAssigned?: DroneRoute
     ) {
         this.id = id;
         this.name = name;
         this.status = status || DroneStatus.online;
         this.currentLocation = currentLocation;
         this.currentRouteAssigned = currentRouteAssigned;
-        this.LastRouteAssigned = LastRouteAssigned;
+        this.lastRouteAssigned = lastRouteAssigned;
     }
 
 }

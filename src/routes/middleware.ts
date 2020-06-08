@@ -22,6 +22,7 @@ export const adminMW = async (req: Request, res: Response, next: NextFunction) =
         }
         // Make sure user role is an admin
         const clientData = await jwtService.decodeJwt(jwt);
+        logger.info(JSON.stringify(clientData));
         if (clientData.role === UserRoles.Admin) {
             res.locals.userId = clientData.id;
             next();

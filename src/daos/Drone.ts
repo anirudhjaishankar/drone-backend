@@ -28,6 +28,11 @@ class DroneDao implements IDrones {
     }
 
 
+    public async getAvailable(): Promise<any> {
+        return this.collectionRef.where('status', '==', 'online').get();
+    }
+
+
     public async add(newDrone: Drone): Promise<any> {
         return this.collectionRef.add(newDrone);
     }

@@ -21,9 +21,9 @@ const droneRouteDao = new DroneRouteDao();
 router.get('/all', async (req: Request, res: Response) => {
     await droneRouteDao.getAll().then((docData) => {
         if (docData.empty) {
-            const apiResponse: ApiResponse<string> = {
+            const apiResponse: ApiResponse<any> = {
                 status: OK,
-                message: noRoutesAvailable
+                message: []
             }
             return res.status(OK).json(apiResponse).end();
         } else {

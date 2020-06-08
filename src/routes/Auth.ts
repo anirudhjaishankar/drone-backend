@@ -7,6 +7,7 @@ import { JwtService } from '@shared/JwtService';
 import { paramMissingError, loginFailedErr, cookieProps, loginSuccess, logoutMessage } from '@shared/constants';
 import { User } from '@entities/User';
 import { parseFirestoreUserDocToIUser } from '@shared/functions';
+import logger from '@shared/Logger';
 
 
 const router = Router();
@@ -27,15 +28,16 @@ router.post('/login', async (req: Request, res: Response) => {
         });
     }
     // Fetch user
-    return userDao.getOne(email).then( async docData => {
+    return userDao.getByEmail(email).then( async docData => {
         if (docData.empty) {
             return res.status(UNAUTHORIZED).json({
                 error: loginFailedErr,
             });
         }
-
         const doc: any = docData.docs[0];
+        logger.info(JSON.stringify(doc.data()));
         const user: User = parseFirestoreUserDocToIUser(doc.id, doc.data());
+        logger.info(JSON.stringify(user));
         // Check password
         const pwdPassed = await bcrypt.compare(password, user.pwdHash);
         if (!pwdPassed) {
@@ -51,8 +53,19 @@ router.post('/login', async (req: Request, res: Response) => {
         });
         const { key, options } = cookieProps;
         res.cookie(key, jwt, options);
+
+        const loginSuccessData = {
+            userRole: user.role,
+            userName: user.name,
+            userId: user.id
+        }
+
         // Return
-        return res.status(OK).json({success: loginSuccess}).end();
+        return res.status(OK).json(
+        {
+            success: loginSuccess,
+            userData: loginSuccessData
+        }).end();
     });
 });
 

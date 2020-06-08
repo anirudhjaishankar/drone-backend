@@ -13,13 +13,18 @@ export interface IUserDao {
 
 const db = getDbRef();
 
-class  UserDao implements IUserDao {
+class UserDao implements IUserDao {
 
 
     /**
-     * @param email
+     * @param userId
      */
-    public async getOne(email: string): Promise<any> {
+    public async getOne(userId: string): Promise<any> {
+        return db.collection(userCollection).doc(userId).get();
+    }
+
+
+    public async getByEmail(email: string): Promise<any> {
         return db.collection(userCollection).where('email', '==', email).get();
     }
 

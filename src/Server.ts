@@ -14,9 +14,11 @@ import logger from '@shared/Logger';
 import { cookieProps } from '@shared/constants';
 import fs from 'fs';
 
+const cors = require('cors');
 const swaggerUi = require('swagger-ui-express');
 const YAML = require('yamljs');
 const swaggerDocument = YAML.load('./src/swagger.yaml');
+
 
 
 
@@ -29,7 +31,6 @@ const app = express();
 /************************************************************************************
  *                              Set basic express settings
  ***********************************************************************************/
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser(process.env.COOKIE_SECRET));
@@ -49,8 +50,14 @@ if (process.env.NODE_ENV === 'production') {
     app.use(helmet());
 }
 
+
 // Add APIs
-app.use('/api', BaseRouter);
+app.use('/api', cors({
+    origin: 'http://localhost:4200',
+    methods: ['GET','PUT','POST','DELETE','UPDATE','OPTIONS'],
+    allowHeaders: ['X-Requested-With', 'X-HTTP-Method-Override', 'Content-Type','Accept'],
+    credentials: true
+}), BaseRouter);
 
 // Print API errors
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

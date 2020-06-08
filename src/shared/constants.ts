@@ -6,6 +6,7 @@ export const mailSenderError = 'Failed to send mail';
 export const userCollection = 'users';
 export const droneRoutesCollection = 'drone_routes';
 export const droneCollection = 'drones';
+export const scheduleCollection = 'schedules';
 export const getFailed = 'Cannot get data from DB';
 export const updateSuccessfull = 'Update successful';
 export const updateFailed = 'Update failed';
@@ -48,3 +49,8 @@ export const droneRouteAddSuccess = 'Drone Route added successfully';
 // Drones
 export const noDronesAvailable = 'No Drones Present';
 export const droneAddSuccess = 'Drone added successfully';
+
+
+// Schedules
+export const noSchedulesAvailable = 'No Schedules Present';
+export const scheduleAddSuccess = 'Schedule added successfully';

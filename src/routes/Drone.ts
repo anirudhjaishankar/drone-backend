@@ -19,30 +19,39 @@ const droneDao = new DroneDao();
 
 
 router.get('/all', async (req: Request, res: Response) => {
-    await droneDao.getAll().then((docData) => {
-        if (docData.empty) {
-            const apiResponse: ApiResponse<string> = {
+    return await droneDao.getAll().then((result: any) => {
+        // logger.info("just checking");
+
+        if (result.exists) {
+            const apiResponse: ApiResponse<any> = {
                 status: OK,
-                message: noDronesAvailable
-            }
+                message: []
+            };
             return res.status(OK).json(apiResponse).end();
         } else {
             const drones: Drone[] = [];
 
-            docData.forEach((doc: any) => {
+            result.forEach((doc: any) => {
                 logger.info(JSON.stringify(doc.data()));
                 const drone: Drone = doc.data();
                 drone.id = doc.id;
                 drones.push(drone);
             });
+            logger.info(JSON.stringify(drones));
 
             const apiResponse: ApiResponse<Drone[]> = {
                 status: OK,
                 message: drones
             };
-
             return res.status(OK).json(apiResponse).end();
         }
+    }).catch((err: any) => {
+        logger.error(err);
+        const apiResponse: ApiResponse<string> = {
+            status: INTERNAL_SERVER_ERROR,
+            message: getFailed
+        };
+        return res.status(INTERNAL_SERVER_ERROR).json(apiResponse).end();
     });
 });
 
@@ -87,7 +96,6 @@ router.get('/get/:id', async (req: Request, res: Response) => {
 
 router.post('/add', async (req: Request, res: Response) => {
 
-    // logger.info(JSON.stringify(req.body));
     const { drone } = req.body;
 
     if (!drone) {
@@ -143,7 +151,7 @@ router.put('/update', async (req: Request, res: Response) => {
 
 
 /******************************************************************************
- *                      Delete Drone Route - "DELETE /api/droneroutes/delete/:id"
+ *                      Delete Drone - "DELETE /api/drone/delete/:id"
  ******************************************************************************/
 
 router.delete('/delete/:id', async (req: Request, res: Response) => {
@@ -159,6 +167,44 @@ router.delete('/delete/:id', async (req: Request, res: Response) => {
         const apiResponse: ApiResponse<string> = {
             status: INTERNAL_SERVER_ERROR,
             message: deleteFailed
+        };
+        return res.status(INTERNAL_SERVER_ERROR).json(apiResponse).end();
+    });
+});
+
+/******************************************************************************
+ *                      GET All available drones - "GET /api/drone/get/available"
+ ******************************************************************************/
+
+router.get('/available', async (req: Request, res: Response) => {
+    return await droneDao.getAvailable().then((result: any) => {
+        if (!result.exists) {
+            const apiResponse: ApiResponse<string> = {
+                status: OK,
+                message: dataNotFound
+            };
+            return res.status(OK).json(apiResponse).end();
+        } else {
+            const drones: Drone[] = [];
+
+            result.forEach((doc: any) => {
+                logger.info(JSON.stringify(doc.data()));
+                const drone: Drone = doc.data();
+                drone.id = doc.id;
+                drones.push(drone);
+            });
+
+            const apiResponse: ApiResponse<Drone[]> = {
+                status: OK,
+                message: drones
+            };
+            return res.status(OK).json(apiResponse).end();
+        }
+    }).catch((err: any) => {
+        logger.error(err);
+        const apiResponse: ApiResponse<string> = {
+            status: INTERNAL_SERVER_ERROR,
+            message: getFailed
         };
         return res.status(INTERNAL_SERVER_ERROR).json(apiResponse).end();
     });

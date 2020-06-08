@@ -1,0 +1,58 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const tslib_1 = require("tslib");
+const cookie_parser_1 = tslib_1.__importDefault(require("cookie-parser"));
+const morgan_1 = tslib_1.__importDefault(require("morgan"));
+const path_1 = tslib_1.__importDefault(require("path"));
+const helmet_1 = tslib_1.__importDefault(require("helmet"));
+const express_1 = tslib_1.__importDefault(require("express"));
+const http_status_codes_1 = require("http-status-codes");
+require("express-async-errors");
+const routes_1 = tslib_1.__importDefault(require("./routes"));
+const Logger_1 = tslib_1.__importDefault(require("@shared/Logger"));
+const constants_1 = require("@shared/constants");
+const cors = require('cors');
+const swaggerUi = require('swagger-ui-express');
+const YAML = require('yamljs');
+const swaggerDocument = YAML.load('./src/swagger.yaml');
+const app = express_1.default();
+app.use(express_1.default.json());
+app.use(express_1.default.urlencoded({ extended: true }));
+app.use(cookie_parser_1.default(process.env.COOKIE_SECRET));
+app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+if (process.env.NODE_ENV === 'development') {
+    app.use(morgan_1.default('dev'));
+}
+if (process.env.NODE_ENV === 'production') {
+    app.use(helmet_1.default());
+}
+app.use('/api', cors({
+    origin: 'http://localhost:4200',
+    methods: ['GET', 'PUT', 'POST', 'DELETE', 'UPDATE', 'OPTIONS'],
+    allowHeaders: ['X-Requested-With', 'X-HTTP-Method-Override', 'Content-Type', 'Accept'],
+    credentials: true
+}), routes_1.default);
+app.use((err, req, res, next) => {
+    Logger_1.default.error(err.message, err);
+    return res.status(http_status_codes_1.BAD_REQUEST).json({
+        error: err.message,
+    });
+});
+const viewsDir = path_1.default.join(__dirname, 'views');
+app.set('views', viewsDir);
+const staticDir = path_1.default.join(__dirname, 'public');
+app.use(express_1.default.static(staticDir));
+app.get('/', (req, res) => {
+    res.sendFile('login.html', { root: viewsDir });
+});
+app.get('/users', (req, res) => {
+    const jwt = req.signedCookies[constants_1.cookieProps.key];
+    if (!jwt) {
+        res.redirect('/');
+    }
+    else {
+        res.sendFile('users.html', { root: viewsDir });
+    }
+});
+exports.default = app;
+//# sourceMappingURL=Server.js.map

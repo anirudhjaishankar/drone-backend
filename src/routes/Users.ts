@@ -4,7 +4,7 @@ import { ParamsDictionary } from 'express-serve-static-core';
 
 import UserDao from '@daos/User';
 import { paramMissingError, noUsers, pwdSaltRounds, mailSenderError, updateSuccessfull, updateFailed, deleteFailed, deleteSuccess, addUserSuccess, hashError, userNotFound, getFailed } from '@shared/constants';
-import { adminMW } from './middleware';
+import { userMW, adminMW } from './middleware';
 import { UserRoles, User } from '@entities/User';
 import bcrypt from 'bcrypt';
 import ApiResponse from '@entities/ApiResponse';
@@ -15,7 +15,7 @@ import logger from '@shared/Logger';
 
 
 // Init shared
-const router = Router().use(adminMW);
+const router = Router().use(userMW);
 const userDao = new UserDao();
 
 
@@ -23,7 +23,7 @@ const userDao = new UserDao();
  *                      Get All Users - "GET /api/users/all"
  ******************************************************************************/
 
-router.get('/all', async (req: Request, res: Response) => {
+router.get('/all', adminMW, async (req: Request, res: Response) => {
     await userDao.getAll().then((docData) => {
         if (docData.empty) {
             return res.status(OK).json({ message: noUsers });
@@ -32,6 +32,7 @@ router.get('/all', async (req: Request, res: Response) => {
 
             docData.forEach((doc: any) => {
                 const user = parseFirestoreUserDocToIUser(doc.id, doc.data());
+                user.pwdHash = '';
                 users.push(user);
             });
 
@@ -83,7 +84,7 @@ router.get('/get/:id', async (req: Request, res: Response) => {
  *                       Add One - "POST /api/users/add"
  ******************************************************************************/
 
-router.post('/add', async (req: Request, res: Response) => {
+router.post('/add', adminMW, async (req: Request, res: Response) => {
     // Check parameters
     const { user } = req.body;
     if (!user) {
@@ -171,7 +172,7 @@ router.put('/update', async (req: Request, res: Response) => {
  *                    Delete - "DELETE /api/users/delete/:id"
  ******************************************************************************/
 
-router.delete('/delete/:id', async (req: Request, res: Response) => {
+router.delete('/delete/:id', adminMW, async (req: Request, res: Response) => {
     const { id } = req.params as ParamsDictionary;
     return await userDao.delete(id).then((result: any) => {
         const apiResponse: ApiResponse<string> = {

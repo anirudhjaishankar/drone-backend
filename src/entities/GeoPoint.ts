@@ -1,5 +1,5 @@
 export class GeoPoint {
-    public id: string;
+    public id?: string;
     public name: string;
     public latitude: number;
     public longitude: number;

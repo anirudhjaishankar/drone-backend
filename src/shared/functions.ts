@@ -30,7 +30,7 @@ export const parseFirestoreUserDocToIUser = (docId: number, docData: any): User 
     user.email = docData.email;
     user.id = docId;
     user.name = docData.name;
-    if (docData.is_admin === '1') {
+    if (docData.is_admin === 1) {
         user.role = UserRoles.Admin;
     } else {
         user.role = UserRoles.Standard;
